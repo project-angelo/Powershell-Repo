@@ -1,0 +1,19 @@
+Connect-ExchangeOnline
+
+$Members = Import-Csv -Path "C:\Users\angelojt\Documents\members.csv"
+
+# Distribution list name
+$DistributionList = "Miepol Staff"
+
+# Add each member
+foreach ($Member in $Members) {
+    try {
+        Add-DistributionGroupMember -Identity $DistributionList -Member $Member.EmailAddress -ErrorAction Stop
+        Write-Host "✓ Added: $($Member.EmailAddress)" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "✗ Failed: $($Member.EmailAddress) - $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+Write-Host "`nCompleted!" -ForegroundColor Cyan

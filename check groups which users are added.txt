@@ -1,0 +1,18 @@
+# Connect to Exchange Online
+Connect-ExchangeOnline
+
+# Specify the contact email
+$contactEmail = "useremail"  # Change this
+
+# Get all distribution groups the contact is a member of
+$groups = Get-DistributionGroup -ResultSize Unlimited | 
+    Where-Object {(Get-DistributionGroupMember -Identity $_.Identity | 
+    Select-Object -ExpandProperty PrimarySmtpAddress) -contains $contactEmail}
+
+# Display results
+if ($groups) {
+    Write-Host "`nContact '$contactEmail' is a member of these distribution groups:" -ForegroundColor Green
+    $groups | Select-Object DisplayName, PrimarySmtpAddress, GroupType | Format-Table -AutoSize
+} else {
+    Write-Host "`nContact '$contactEmail' is not a member of any distribution groups." -ForegroundColor Yellow
+}
