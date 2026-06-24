@@ -1,0 +1,35 @@
+# Enable RDP
+Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" `
+                 -Name "fDenyTSConnections" -Value 0
+
+# Enable firewall rule
+Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+# Disable session timeout for ML jobs
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+if (!(Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
+Set-ItemProperty -Path $RegPath -Name "MaxIdleTime" -Value 0
+Set-ItemProperty -Path $RegPath -Name "MaxDisconnectionTime" -Value 0
+
+Write-Host "RDP enabled on $env:COMPUTERNAME"
+
+
+# Add each analyst — use AzureAD\ prefix for Entra accounts
+$Analysts = @(
+    "AzureAD\analyst1",
+    "AzureAD\analyst2",
+    "AzureAD\saad.abbas"
+    # Add all analysts here
+)
+
+foreach ($User in $Analysts) {
+    net localgroup "Remote Desktop Users" $User /add
+    Write-Host "Added: $User"
+}
+
+# Note this IP — analysts will RDP to this address
+Get-NetIPAddress -AddressFamily IPv4 | 
+    Where-Object { $_.IPAddress -notlike "169*" -and $_.IPAddress -ne "127.0.0.1" } |
+    Select-Object InterfaceAlias, IPAddress |
+    Format-Table -AutoSize
+#ip is 10.0.0.203

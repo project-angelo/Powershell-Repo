@@ -1,0 +1,11 @@
+# Variables
+$SharedMailbox = "hra@hra.com.au"
+$User = "sdrummond@hra.com.au"
+
+# Grant Full Access (read and manage)
+Add-MailboxPermission `
+    -Identity $SharedMailbox `
+    -User $User `
+    -AccessRights FullAccess `
+    -InheritanceType All `
+    -AutoMapping $true
